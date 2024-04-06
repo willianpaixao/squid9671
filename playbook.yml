@@ -1,0 +1,52 @@
+---
+- name: Start Prometheus stack
+  hosts: ungrouped
+  tasks:
+    - name: Template prometheus.yml
+      ansible.builtin.template:
+        src: templates/prometheus.yml.j2
+        dest: /tmp/prometheus.yml
+        owner: root
+        group: docker
+        mode: '0444'
+
+    - name: Create Prometheus container
+      community.docker.docker_container:
+        name: prometheus
+        image: quay.io/prometheus/prometheus:v2.51.1
+        ports:
+          - "9090:9090"
+        volumes:
+          - /tmp/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+
+    - name: Create Alertmanager container
+      community.docker.docker_container:
+        name: alertmanager
+        image: quay.io/prometheus/alertmanager:v0.27.0
+        ports:
+          - "9093:9093"
+
+    - name: Create node-exporter container
+      community.docker.docker_container:
+        name: node-exporter
+        image: quay.io/prometheus/node-exporter:v1.7.0
+        command: '--path.rootfs=/host'
+        volumes:
+          - '/:/host:ro,rslave'
+        network_mode: host
+
+    - name: Create cAdvisor container
+      community.docker.docker_container:
+        name: cadvisor
+        image: gcr.io/cadvisor/cadvisor:v0.49.1
+        volumes:
+          - '/:/rootfs:ro'
+          - '/dev/disk/:/dev/disk:ro'
+          - '/sys:/sys:ro'
+          - '/var/lib/docker/:/var/lib/docker:ro'
+          - '/var/run:/var/run:ro'
+        ports:
+          - "8080"
+        devices:
+          - "/dev/kmsg:ro"
+        privileged: true
