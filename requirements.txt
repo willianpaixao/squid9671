@@ -1,0 +1,2 @@
+ansible-dev-tools==24.2.0
+pre-commit==3.7.0
