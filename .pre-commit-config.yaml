@@ -4,3 +4,9 @@ repos:
     rev: 'v24.2.1'
     hooks:
       - id: ansible-lint
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: 'v4.6.0'
+    hooks:
+      - id: check-merge-conflict
+      - id: mixed-line-ending
+      - id: trailing-whitespace
