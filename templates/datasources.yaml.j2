@@ -1,0 +1,22 @@
+apiVersion: 1
+
+datasources:
+  - access: proxy
+    basicAuth: false
+    editable: true
+    isDefault: true
+    name: loki
+    type: loki
+    uid: loki
+    url: http://{{ ansible_default_ipv4.address }}:3100
+    version: 1
+
+  - access: proxy
+    basicAuth: false
+    editable: true
+    isDefault: false
+    name: prometheus
+    type: prometheus
+    uid: prometheus
+    url: http://{{ ansible_default_ipv4.address }}:9090
+    version: 1

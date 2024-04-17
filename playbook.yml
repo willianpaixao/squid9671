@@ -10,6 +10,22 @@
         group: docker
         mode: '0444'
 
+    - name: Template loki.yaml
+      ansible.builtin.template:
+        src: templates/loki.yaml.j2
+        dest: /tmp/loki.yaml
+        owner: root
+        group: docker
+        mode: '0444'
+
+    - name: Template grafana.ini
+      ansible.builtin.template:
+        src: templates/datasources.yaml.j2
+        dest: /tmp/datasources.yaml
+        owner: root
+        group: docker
+        mode: '0444'
+
     - name: Create Prometheus container
       community.docker.docker_container:
         name: prometheus
@@ -50,3 +66,22 @@
         devices:
           - "/dev/kmsg:ro"
         privileged: true
+
+    - name: Create Loki container
+      community.docker.docker_container:
+        name: loki
+        image: grafana/loki:3.0.0
+        command: '-config.file=/etc/loki/config.yaml'
+        ports:
+          - "3100:3100"
+        volumes:
+          - /tmp/loki.yaml:/etc/loki/config.yaml:ro
+
+    - name: Create Grafana container
+      community.docker.docker_container:
+        name: grafana
+        image: grafana/grafana:10.4.2
+        ports:
+          - "3000:3000"
+        volumes:
+          - /tmp/datasources.yaml:/etc/grafana/provisioning/datasources/datasources.yml:ro
